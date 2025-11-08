@@ -15,7 +15,7 @@ export function RecentSales() {
   const { data: sales, isLoading } = useQuery({
     queryKey: ['sales', 'recent'],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Sale[]>>('/sales?populate=product&sort=saleDate:desc&pagination[limit]=5');
+      const { data } = await apiClient.get<StrapiResponse<Sale[]>>('/sales?populate[product]=*&sort=saleDate:desc&pagination[limit]=5');
       return data.data;
     },
   });
