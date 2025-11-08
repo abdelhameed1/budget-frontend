@@ -6,7 +6,7 @@ export function useBatches() {
   return useQuery({
     queryKey: ['batches'],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Batch[]>>('/batches?populate=product,directCosts');
+      const { data } = await apiClient.get<StrapiResponse<Batch[]>>('/batches?populate[product]=true&populate[directCosts]=true');
       return data.data;
     },
   });
@@ -16,7 +16,7 @@ export function useBatch(id: number) {
   return useQuery({
     queryKey: ['batches', id],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Batch>>(`/batches/${id}?populate=product,directCosts`);
+      const { data } = await apiClient.get<StrapiResponse<Batch>>(`/batches/${id}?populate[product]=true&populate[directCosts]=true`);
       return data.data;
     },
     enabled: !!id,

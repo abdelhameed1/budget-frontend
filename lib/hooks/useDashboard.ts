@@ -8,9 +8,9 @@ export function useDashboardStats() {
     queryFn: async () => {
       // Fetch all necessary data for dashboard
       const [salesRes, batchesRes, inventoryRes] = await Promise.all([
-        apiClient.get<StrapiResponse<any[]>>('/sales?populate=product,batch&sort=saleDate:desc&pagination[limit]=5'),
-        apiClient.get<StrapiResponse<any[]>>('/batches?populate=product&sort=startDate:desc&pagination[limit]=5'),
-        apiClient.get<StrapiResponse<any[]>>('/inventories?populate=product&filters[quantityOnHand][$lte]=10&sort=quantityOnHand:asc'),
+        apiClient.get<StrapiResponse<any[]>>('/sales?populate[product]=*&populate[batch]=*&sort=saleDate:desc&pagination[limit]=5'),
+        apiClient.get<StrapiResponse<any[]>>('/batches?populate[product]=*&sort=startDate:desc&pagination[limit]=5'),
+        apiClient.get<StrapiResponse<any[]>>('/inventories?populate[product]=*&filters[quantityOnHand][$lte]=10&sort=quantityOnHand:asc'),
       ]);
 
       const sales = salesRes.data.data;

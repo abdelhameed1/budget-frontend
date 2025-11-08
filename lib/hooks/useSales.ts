@@ -6,7 +6,7 @@ export function useSales() {
   return useQuery({
     queryKey: ['sales'],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Sale[]>>('/sales?populate=product,batch&sort=saleDate:desc');
+      const { data } = await apiClient.get<StrapiResponse<Sale[]>>('/sales?populate[product]=*&populate[batch]=*&sort=saleDate:desc');
       return data.data;
     },
   });
@@ -16,7 +16,7 @@ export function useSale(id: number) {
   return useQuery({
     queryKey: ['sales', id],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Sale>>(`/sales/${id}?populate=product,batch`);
+      const { data } = await apiClient.get<StrapiResponse<Sale>>(`/sales/${id}?populate[product]=*&populate[batch]=*`);
       return data.data;
     },
     enabled: !!id,
