@@ -37,6 +37,7 @@ export function Header() {
           <ThemeToggle />
           <button
             onClick={toggleLocale}
+            data-navigate="true"
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <Globe className="w-4 h-4 text-gray-700 dark:text-gray-300" />
