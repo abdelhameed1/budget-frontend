@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Providers } from '@/components/providers';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { TopLoader } from '@/components/layout/top-loader';
 
 export default function LocaleLayout({
   children,
@@ -10,6 +11,7 @@ export default function LocaleLayout({
 }) {
   return (
     <Providers>
+      <TopLoader />
       <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">

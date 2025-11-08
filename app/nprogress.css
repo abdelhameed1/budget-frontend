@@ -1,0 +1,63 @@
+/* NProgress Styles - YouTube-style top loader */
+
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #2563eb 50%,
+    #1d4ed8 100%
+  );
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5),
+              0 0 5px rgba(59, 130, 246, 0.5);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  #nprogress .bar {
+    background: linear-gradient(
+      90deg,
+      #60a5fa 0%,
+      #3b82f6 50%,
+      #2563eb 100%
+    );
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.6),
+                0 0 5px rgba(96, 165, 250, 0.6);
+  }
+}
+
+/* Fancy blur effect */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #3b82f6, 0 0 5px #3b82f6;
+  opacity: 1;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Remove spinner */
+#nprogress .spinner {
+  display: none;
+}
+
+/* Animation */
+@keyframes nprogress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

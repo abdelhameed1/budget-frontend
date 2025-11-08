@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { locales } from '@/i18n';
 import "./globals.css";
+import "./nprogress.css";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
