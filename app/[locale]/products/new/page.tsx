@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useCreateProduct } from '@/lib/hooks/useProducts';
+import { useCategories } from '@/lib/hooks/useCategories';
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -14,19 +15,22 @@ export default function NewProductPage() {
   const locale = useLocale();
   const router = useRouter();
   const createProduct = useCreateProduct();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+
+  // Fallback label if translation key is missing
+  const selectCategoryLabel = locale === 'ar' ? 'اختر النوع' : 'Select product category';
 
   const [formData, setFormData] = useState({
     name: '',
-    sku: '',
     description: '',
-    category: 'other' as 'clothing' | 'accessories' | 'home' | 'other',
-    targetSellingPrice: 0,
-    standardMaterialCost: 0,
-    standardLaborCost: 0,
-    standardOverheadCost: 0,
+    category: null as number | null,
+    targetSellingPrice: '' as string | number,
+    standardMaterialCost: '' as string | number,
+    standardLaborCost: '' as string | number,
+    standardOverheadCost: '' as string | number,
     lifecycleStage: 'development' as 'development' | 'launch' | 'growth' | 'maturity' | 'decline',
-    developmentCost: 0,
-    expectedLifetimeSales: 0,
+    developmentCost: '' as string | number,
+    expectedLifetimeSales: '' as string | number,
     isActive: true,
     notes: '',
   });
@@ -34,7 +38,37 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createProduct.mutateAsync(formData);
+      const payload: any = {
+        name: formData.name,
+        description: formData.description || undefined,
+        category: formData.category || undefined,
+        lifecycleStage: formData.lifecycleStage,
+        isActive: formData.isActive,
+        notes: formData.notes || undefined,
+      };
+
+      // Parse numeric fields (allow empty during edit, validate on submit)
+      const n = (v: string | number) => (v === '' ? undefined : typeof v === 'number' ? v : parseFloat(v));
+      const targetPrice = n(formData.targetSellingPrice);
+      if (targetPrice === undefined || Number.isNaN(targetPrice)) {
+        // Respect required validation
+        return alert(t('hints.targetPrice'));
+      }
+      payload.targetSellingPrice = targetPrice;
+
+      const material = n(formData.standardMaterialCost);
+      const labor = n(formData.standardLaborCost);
+      const overhead = n(formData.standardOverheadCost);
+      const devCost = n(formData.developmentCost);
+      const expectedSales = n(formData.expectedLifetimeSales);
+
+      if (material !== undefined && !Number.isNaN(material)) payload.standardMaterialCost = material;
+      if (labor !== undefined && !Number.isNaN(labor)) payload.standardLaborCost = labor;
+      if (overhead !== undefined && !Number.isNaN(overhead)) payload.standardOverheadCost = overhead;
+      if (devCost !== undefined && !Number.isNaN(devCost)) payload.developmentCost = devCost;
+      if (expectedSales !== undefined && !Number.isNaN(expectedSales)) payload.expectedLifetimeSales = expectedSales;
+
+      await createProduct.mutateAsync(payload);
       router.push(`/${locale}/products`);
     } catch (error) {
       alert(tCommon('error'));
@@ -45,8 +79,9 @@ export default function NewProductPage() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : 
-              type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
+      [name]: type === 'number' ? value :
+              type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+              name === 'category' ? (value ? parseInt(value) : null) :
               value
     }));
   };
@@ -91,17 +126,24 @@ export default function NewProductPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('sku')} *
+              {t('category')} *
             </label>
-            <input
-              type="text"
-              name="sku"
-              value={formData.sku}
+            <select
+              name="category"
+              value={formData.category || ''}
               onChange={handleChange}
               required
+              disabled={categoriesLoading}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.sku')}</p>
+            >
+              <option value="">{categoriesLoading ? tCommon('loading') : selectCategoryLabel}</option>
+              {categories?.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {locale === 'ar' ? category.nameAr : category.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.category')}</p>
           </div>
 
           <div className="md:col-span-2">
@@ -118,24 +160,13 @@ export default function NewProductPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.description')}</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('category')} *
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-            >
-              <option value="clothing">{t('categories.clothing')}</option>
-              <option value="accessories">{t('categories.accessories')}</option>
-              <option value="home">{t('categories.home')}</option>
-              <option value="other">{t('categories.other')}</option>
-            </select>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.category')}</p>
-          </div>
+          {/* <div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                <strong>{t('sku')}:</strong> {t('hints.skuAuto')}
+              </p>
+            </div>
+          </div> */}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

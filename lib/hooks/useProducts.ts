@@ -6,7 +6,7 @@ export function useProducts() {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Product[]>>('/products');
+      const { data } = await apiClient.get<StrapiResponse<Product[]>>('/products?populate[category]=true');
       return data.data;
     },
   });
@@ -16,7 +16,7 @@ export function useProduct(id: number) {
   return useQuery({
     queryKey: ['products', id],
     queryFn: async () => {
-      const { data } = await apiClient.get<StrapiResponse<Product>>(`/products/${id}`);
+      const { data } = await apiClient.get<StrapiResponse<Product>>(`/products/${id}?populate[category]=true`);
       return data.data;
     },
     enabled: !!id,
@@ -27,7 +27,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (productData: Partial<Product>) => {
+    mutationFn: async (productData: any) => {
       const { data } = await apiClient.post<StrapiResponse<Product>>('/products', {
         data: productData,
       });

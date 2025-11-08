@@ -60,7 +60,12 @@ export default function ProductsPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">{t('category')}:</span>
-                  <span className="font-medium">{t(`categories.${product.category}`)}</span>
+                  <span className="font-medium">
+                    {product.category 
+                      ? (locale === 'ar' ? product.category.nameAr : product.category.name)
+                      : '-'
+                    }
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">{t('lifecycleStage')}:</span>

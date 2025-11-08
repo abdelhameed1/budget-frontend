@@ -19,12 +19,21 @@ export interface StrapiEntity {
   publishedAt?: string;
 }
 
+// Category Types
+export interface Category extends StrapiEntity {
+  name: string;
+  nameAr: string;
+  code: string;
+  description?: string;
+  isActive: boolean;
+}
+
 // Product Types
 export interface Product extends StrapiEntity {
   name: string;
   sku: string;
   description?: string;
-  category: 'clothing' | 'accessories' | 'home' | 'other';
+  category?: Category;
   targetSellingPrice: number;
   standardMaterialCost: number;
   standardLaborCost: number;
