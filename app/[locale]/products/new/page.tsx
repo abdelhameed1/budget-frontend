@@ -23,7 +23,7 @@ export default function NewProductPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: null as number | null,
+    category: '' as string, // Changed to string for documentId
     targetSellingPrice: '' as string | number,
     standardMaterialCost: '' as string | number,
     standardLaborCost: '' as string | number,
@@ -80,9 +80,9 @@ export default function NewProductPage() {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? value :
-              type === 'checkbox' ? (e.target as HTMLInputElement).checked :
-              name === 'category' ? (value ? parseInt(value) : null) :
-              value
+        type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+          // category is now a string (documentId), so no parseInt needed
+          value
     }));
   };
 
@@ -138,7 +138,7 @@ export default function NewProductPage() {
             >
               <option value="">{categoriesLoading ? tCommon('loading') : selectCategoryLabel}</option>
               {categories?.map((category) => (
-                <option key={category.id} value={category.id}>
+                <option key={category.documentId || category.id} value={category.documentId}>
                   {locale === 'ar' ? category.nameAr : category.name}
                 </option>
               ))}
@@ -257,43 +257,6 @@ export default function NewProductPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.overheadCost')}</p>
-          </div>
-
-          {/* Development */}
-          <div className="md:col-span-2 mt-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('sections.development')}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('sections.developmentHint')}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('developmentCost')}
-            </label>
-            <input
-              type="number"
-              name="developmentCost"
-              value={formData.developmentCost}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.developmentCost')}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('expectedSales')}
-            </label>
-            <input
-              type="number"
-              name="expectedLifetimeSales"
-              value={formData.expectedLifetimeSales}
-              onChange={handleChange}
-              min="0"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.expectedSales')}</p>
           </div>
 
           <div className="md:col-span-2">

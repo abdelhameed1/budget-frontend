@@ -27,11 +27,26 @@ export function useCreateBatch() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (batchData: Partial<Batch>) => {
-      const { data } = await apiClient.post<StrapiResponse<Batch>>('/batches', {
+    mutationFn: async ({ batchData, directCosts }: { batchData: Partial<Batch>, directCosts?: any[] }) => {
+      // 1. Create the Batch
+      const { data: batchRes } = await apiClient.post<StrapiResponse<Batch>>('/batches', {
         data: batchData,
       });
-      return data.data;
+      const newBatch = batchRes.data;
+
+      // 2. Create Direct Costs if any
+      if (directCosts && directCosts.length > 0) {
+        await Promise.all(directCosts.map(cost =>
+          apiClient.post('/direct-costs', {
+            data: {
+              ...cost,
+              batch: newBatch.documentId, // Link to the new batch
+            }
+          })
+        ));
+      }
+
+      return newBatch;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['batches'] });
