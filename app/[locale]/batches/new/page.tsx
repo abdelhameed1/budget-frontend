@@ -9,15 +9,24 @@ import { useState } from 'react';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
+interface FormData {
+  batchNumber: string;
+  product: string;
+  plannedQuantity: number | string;
+  actualQuantity: number | string;
+  status: 'planned' | 'in_production' | 'quality_check' | 'completed' | 'cancelled';
+  startDate: string;
+  productionHours: number | string;
+  productionDays: number | string;
+  notes: string;
+}
+
 interface DirectCostInput {
   costType: 'material' | 'labor';
   description: string;
-  quantity: number;
+  quantity: number | string;
   unit: string;
-  unitCost: number;
-  supplier?: string;
-  purchaseDate?: string;
-  invoiceNumber?: string;
+  unitCost: number | string;
 }
 
 export default function NewBatchPage() {
@@ -29,19 +38,42 @@ export default function NewBatchPage() {
   const createBatch = useCreateBatch();
   const { data: products } = useProducts();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     batchNumber: '',
     product: '',
-    plannedQuantity: 0,
-    actualQuantity: 0,
-    status: 'planned' as 'planned' | 'in_production' | 'quality_check' | 'completed' | 'cancelled',
+    plannedQuantity: '',
+    actualQuantity: '',
+    status: 'planned',
     startDate: new Date().toISOString().split('T')[0],
-    productionHours: 0,
-    productionDays: 0,
+    productionHours: '',
+    productionDays: '',
     notes: '',
   });
 
   const [directCosts, setDirectCosts] = useState<DirectCostInput[]>([]);
+
+  // Derived state for product snapshot
+  const selectedProduct = products?.find(p => p.id === Number(formData.product));
+
+  // Derived state for cost estimation
+  const estimatedCost = selectedProduct && Number(formData.plannedQuantity) > 0
+    ? (
+      (Number(selectedProduct.standardMaterialCost) || 0) +
+      (Number(selectedProduct.standardLaborCost) || 0) +
+      (Number(selectedProduct.standardOverheadCost) || 0)
+    ) * Number(formData.plannedQuantity)
+    : 0;
+
+  // Calculate total direct costs
+  const totalDirectCosts = directCosts.reduce((sum, cost) => {
+    return sum + (Number(cost.quantity) * Number(cost.unitCost));
+  }, 0);
+
+  const generateBatchNumber = () => {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    setFormData(prev => ({ ...prev, batchNumber: `BATCH-${date}-${random}` }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +81,29 @@ export default function NewBatchPage() {
       const batchData = {
         ...formData,
         product: parseInt(formData.product),
+        plannedQuantity: Number(formData.plannedQuantity) || 0,
+        actualQuantity: Number(formData.actualQuantity) || 0,
+        productionHours: Number(formData.productionHours) || 0,
+        productionDays: Number(formData.productionDays) || 0,
       };
-      await createBatch.mutateAsync(batchData);
+
+      const formattedDirectCosts = directCosts.map(cost => {
+        const quantity = Number(cost.quantity) || 0;
+        const unitCost = Number(cost.unitCost) || 0;
+        return {
+          ...cost,
+          quantity,
+          unitCost,
+          totalCost: quantity * unitCost,
+        };
+      });
+
+      // Pass both batch data and direct costs to the mutation
+      await createBatch.mutateAsync({
+        batchData,
+        directCosts: formattedDirectCosts
+      });
+
       router.push(`/${locale}/batches`);
     } catch (error) {
       alert(tCommon('error'));
@@ -61,7 +114,9 @@ export default function NewBatchPage() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : value
+      [name]: type === 'number'
+        ? (value === '' ? '' : parseFloat(value))
+        : value
     }));
   };
 
@@ -69,12 +124,9 @@ export default function NewBatchPage() {
     setDirectCosts(prev => [...prev, {
       costType: 'material',
       description: '',
-      quantity: 0,
+      quantity: '',
       unit: '',
-      unitCost: 0,
-      supplier: '',
-      purchaseDate: new Date().toISOString().split('T')[0],
-      invoiceNumber: '',
+      unitCost: '',
     }]);
   };
 
@@ -83,7 +135,7 @@ export default function NewBatchPage() {
   };
 
   const updateDirectCost = (index: number, field: keyof DirectCostInput, value: any) => {
-    setDirectCosts(prev => prev.map((cost, i) => 
+    setDirectCosts(prev => prev.map((cost, i) =>
       i === index ? { ...cost, [field]: value } : cost
     ));
   };
@@ -108,21 +160,30 @@ export default function NewBatchPage() {
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{t('sections.batchInfo')}</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('sections.batchInfoHint')}</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('batchNumber')} *
               </label>
-              <input
-                type="text"
-                name="batchNumber"
-                value={formData.batchNumber}
-                onChange={handleChange}
-                required
-                placeholder="B-001"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="batchNumber"
+                  value={formData.batchNumber}
+                  onChange={handleChange}
+                  required
+                  placeholder="B-001"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
+                />
+                <button
+                  type="button"
+                  onClick={generateBatchNumber}
+                  className="px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+                >
+                  Generate
+                </button>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.batchNumber')}</p>
             </div>
 
@@ -147,6 +208,33 @@ export default function NewBatchPage() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.product')}</p>
             </div>
 
+            {/* Product Snapshot Card */}
+            {selectedProduct && (
+              <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  Product Snapshot: {selectedProduct.name}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="block text-blue-600 dark:text-blue-300 text-xs">SKU</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedProduct.sku}</span>
+                  </div>
+                  <div>
+                    <span className="block text-blue-600 dark:text-blue-300 text-xs">Target Price</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedProduct.targetSellingPrice}</span>
+                  </div>
+                  <div>
+                    <span className="block text-blue-600 dark:text-blue-300 text-xs">Std. Material Cost</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedProduct.standardMaterialCost}</span>
+                  </div>
+                  <div>
+                    <span className="block text-blue-600 dark:text-blue-300 text-xs">Std. Labor Cost</span>
+                    <span className="font-medium text-blue-900 dark:text-blue-100">{selectedProduct.standardLaborCost}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('plannedQuantity')} *
@@ -163,19 +251,17 @@ export default function NewBatchPage() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.plannedQuantity')}</p>
             </div>
 
+            {/* Cost Estimation */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('actualQuantity')}
+                Estimated Total Cost
               </label>
-              <input
-                type="number"
-                name="actualQuantity"
-                value={formData.actualQuantity}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.actualQuantity')}</p>
+              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 font-medium">
+                {estimatedCost.toLocaleString()} {locale === 'ar' ? 'ج.م' : 'EGP'}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Based on standard costs × planned quantity
+              </p>
             </div>
 
             <div>
@@ -208,37 +294,6 @@ export default function NewBatchPage() {
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.startDate')}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('productionHours')}
-              </label>
-              <input
-                type="number"
-                name="productionHours"
-                value={formData.productionHours}
-                onChange={handleChange}
-                min="0"
-                step="0.5"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.productionHours')}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('productionDays')}
-              </label>
-              <input
-                type="number"
-                name="productionDays"
-                value={formData.productionDays}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('hints.productionDays')}</p>
             </div>
 
             <div className="md:col-span-2">
@@ -365,13 +420,23 @@ export default function NewBatchPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-600 dark:text-gray-400">Total Cost:</span>
                         <span className="font-medium text-gray-900 dark:text-gray-100">
-                          {(cost.quantity * cost.unitCost).toFixed(2)} {locale === 'ar' ? 'ج.م' : 'EGP'}
+                          {(Number(cost.quantity) * Number(cost.unitCost)).toFixed(2)} {locale === 'ar' ? 'ج.م' : 'EGP'}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
+
+              {/* Grand Total Display */}
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-right">
+                  <span className="block text-sm text-gray-600 dark:text-gray-400">Total Direct Costs</span>
+                  <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    {totalDirectCosts.toFixed(2)} {locale === 'ar' ? 'ج.م' : 'EGP'}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>
