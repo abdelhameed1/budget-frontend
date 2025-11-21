@@ -7,22 +7,24 @@ import {
   LayoutDashboard,
   Package,
   Layers,
-  ShoppingCart,
   Warehouse,
   PieChart,
   FileText,
   Settings,
+  Banknote,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
   { key: 'dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { key: 'investments', icon: Users, href: '/investments' },
   { key: 'products', icon: Package, href: '/products' },
   { key: 'batches', icon: Layers, href: '/batches' },
-  { key: 'sales', icon: ShoppingCart, href: '/sales' },
-  { key: 'inventory', icon: Warehouse, href: '/inventory' },
-  { key: 'budgets', icon: PieChart, href: '/budgets' },
-  { key: 'reports', icon: FileText, href: '/reports' },
+  //{ key: 'inventory', icon: Warehouse, href: '/inventory' },
+  { key: 'cashflows', icon: Banknote, href: '/cashflows' },
+  // { key: 'budgets', icon: PieChart, href: '/budgets' },
+  //{ key: 'reports', icon: FileText, href: '/reports' },
   { key: 'settings', icon: Settings, href: '/settings' },
 ];
 
@@ -38,13 +40,13 @@ export function Sidebar() {
           {t('appName')}
         </h1>
       </div>
-      
+
       <nav className="flex-1 p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const href = `/${locale}${item.href}`;
           const isActive = pathname === href;
-          
+
           return (
             <Link
               key={item.key}
