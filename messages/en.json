@@ -2,10 +2,12 @@
   "common": {
     "appName": "Budget System",
     "dashboard": "Dashboard",
+    "investments": "Investments",
     "products": "Products",
     "batches": "Production Batches",
     "sales": "Sales",
     "inventory": "Inventory",
+    "cashflows": "Cashflows",
     "budgets": "Budgets",
     "reports": "Reports",
     "settings": "Settings",
@@ -42,6 +44,42 @@
     "active": "Active",
     "inactive": "Inactive"
   },
+  "cashflows": {
+    "title": "Cash Flow",
+    "subtitle": "All cash movements",
+    "newEntry": "New Entry",
+    "type": "Type",
+    "category": "Category",
+    "owner": "Owner",
+    "description": "Description",
+    "amount": "Amount",
+    "paid": "Paid",
+    "pending": "Pending",
+    "paymentMethod": "Payment Method",
+    "markAsPaid": "Mark as Paid",
+    "confirmMarkPaid": "Mark this transaction as paid?",
+    "types": {
+      "owner_investment": "Owner Investment",
+      "expense": "Expense"
+    },
+    "categories": {
+      "owner_investment": "Owner Investment",
+      "material_purchase": "Material Purchase",
+      "labor_payment": "Labor Payment",
+      "overhead_fixed": "Overhead Fixed",
+      "overhead_variable": "Overhead Variable",
+      "zakat": "Zakat",
+      "sadaqat": "Sadaqat",
+      "owner_draw": "Owner Draw",
+      "other": "Other"
+    },
+    "paymentMethods": {
+      "cash": "Cash",
+      "bank_transfer": "Bank Transfer",
+      "credit": "Credit",
+      "other": "Other"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
@@ -60,7 +98,17 @@
     "lastMonth": "Last Month",
     "thisYear": "This Year",
     "viewAll": "View All",
-    "noData": "No recent sales"
+    "noData": "No recent sales",
+    "totalCapital": "Total Capital",
+    "totalProductionCosts": "Total Production Costs",
+    "totalCashflowDirectCosts": "Total Cashflow Direct Costs",
+    "remainingBudget": "Remaining Budget",
+    "utilization": "Utilization",
+    "productionCostBreakdown": "Production Cost Breakdown",
+    "directCostSplit": "Direct Cost Split",
+    "material": "Material",
+    "labor": "Labor",
+    "overhead": "Overhead"
   },
   "products": {
     "title": "Products",
@@ -89,19 +137,19 @@
       "developmentHint": "Track development investments and forecast expected lifetime performance"
     },
     "hints": {
-      "name": "The display name of your product (e.g., 'Cotton T-Shirt', 'Leather Wallet')",
-      "sku": "Unique product identifier for inventory tracking (e.g., 'TSH-001', 'WLT-BLK-01')",
-      "description": "Detailed description of the product, its features, and specifications",
-      "category": "Product category for grouping and reporting purposes",
-      "lifecycleStage": "Current stage in product lifecycle - determines overhead rate allocation",
-      "targetPrice": "Expected selling price per unit - used for profitability analysis",
-      "materialCost": "Standard cost of materials per unit - used as baseline for variance analysis",
-      "laborCost": "Standard labor cost per unit - used as baseline for variance analysis",
-      "overheadCost": "Standard overhead cost per unit - used as baseline for variance analysis",
-      "developmentCost": "Total investment in product development - can be amortized over expected sales",
-      "expectedSales": "Projected lifetime sales volume - used for development cost amortization",
-      "isActive": "Only active products can be used in new batches and sales",
-      "notes": "Additional information, specifications, or internal notes about this product"
+      "name": "The official product name as it will appear in sales and reports (e.g., 'Premium Cotton T-Shirt').",
+      "sku": "A unique code to track this product in inventory (e.g., 'TSH-001'). Generated automatically if left blank.",
+      "description": "A detailed description of the product's features, materials, and specifications.",
+      "category": "Group this product under a specific category for organized reporting and filtering.",
+      "lifecycleStage": "The current stage of the product (e.g., Launch, Growth). This affects how overhead costs are allocated.",
+      "targetPrice": "The planned selling price per unit. This is used to estimate revenue and profit margins.",
+      "materialCost": "Estimated cost of raw materials required to produce one unit.",
+      "laborCost": "Estimated labor cost (wages/time) required to produce one unit.",
+      "overheadCost": "Estimated overhead expenses (rent, utilities, etc.) allocated to one unit.",
+      "developmentCost": "Total one-time cost for researching and developing this product.",
+      "expectedSales": "Total number of units you expect to sell over the product's lifetime.",
+      "isActive": "Keep this checked to make the product available for new batches and sales.",
+      "notes": "Any internal notes or remarks about this product (not visible to customers)."
     },
     "categories": {
       "clothing": "Clothing",
@@ -363,6 +411,26 @@
       "partially_paid": "Partially Paid",
       "fully_paid": "Fully Paid"
     }
+  },
+  "investments": {
+    "title": "Owner Investments",
+    "subtitle": "Track capital contributions and cost allocation",
+    "totalCapital": "Total Capital",
+    "costsIncurred": "Costs Incurred",
+    "remainingCapital": "Remaining Capital",
+    "utilizationRate": "Utilization Rate",
+    "costBreakdown": "Cost Breakdown",
+    "materials": "Materials",
+    "labor": "Labor",
+    "fixedOverhead": "Fixed Overhead",
+    "variableOverhead": "Variable Overhead",
+    "other": "Other",
+    "owner": "Owner",
+    "ownershipPercent": "Ownership %",
+    "totalInvested": "Total Invested",
+    "allocatedCosts": "Allocated Costs",
+    "remainingBudget": "Remaining Budget",
+    "utilizationPercent": "Utilization %"
   },
   "settings": {
     "title": "Settings",
