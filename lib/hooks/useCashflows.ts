@@ -80,3 +80,19 @@ export function useDeleteCashflow() {
     },
   });
 }
+
+export function useMarkCashflowAsPaid() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (documentId: string) => {
+      const { data } = await apiClient.put<StrapiResponse<Cashflow>>(`/cashflows/${documentId}`, {
+        data: { isPaid: true }
+      });
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cashflows'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}

@@ -82,3 +82,20 @@ export function useCompleteBatch() {
     },
   });
 }
+
+export function useUpdateBatchStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ batchDocumentId, status }: { batchDocumentId: string; status: string }) => {
+      const { data } = await apiClient.put(`/batches/${batchDocumentId}`, {
+        data: { status }
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+    },
+  });
+}
+

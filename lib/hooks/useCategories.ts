@@ -1,15 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
-import { StrapiResponse } from '@/lib/types';
-
-export interface Category {
-  id: number;
-  name: string;
-  nameAr: string;
-  code: string;
-  description?: string;
-  isActive: boolean;
-}
+import { StrapiResponse, Category } from '@/lib/types';
 
 export function useCategories() {
   return useQuery({
