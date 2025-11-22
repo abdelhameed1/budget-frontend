@@ -28,6 +28,16 @@ export interface Category extends StrapiEntity {
   isActive: boolean;
 }
 
+// Owner Types
+export interface Owner extends StrapiEntity {
+  ownerName: string;
+  email?: string;
+  phone?: string;
+  totalInvestment: number;
+  isActive: boolean;
+  notes?: string;
+}
+
 // Product Types
 export interface Product extends StrapiEntity {
   name: string;
@@ -48,7 +58,7 @@ export interface Product extends StrapiEntity {
 // Batch Types
 export interface Batch extends StrapiEntity {
   batchNumber: string;
-  product?: Product;
+  product?: Product | number;
   plannedQuantity: number;
   actualQuantity: number;
   status: 'planned' | 'in_production' | 'quality_check' | 'completed' | 'cancelled';
@@ -136,16 +146,16 @@ export interface BudgetPlan extends StrapiEntity {
 }
 
 // Transaction Types
-export interface Transaction extends StrapiEntity {
+export interface Cashflow extends StrapiEntity {
   transactionDate: string;
-  type: 'revenue' | 'expense';
-  category: 'sales' | 'material_purchase' | 'labor_payment' | 'overhead_fixed' | 'overhead_variable' | 'zakat' | 'sadaqat' | 'other';
+  type: 'owner_investment' | 'expense';
+  category: 'owner_investment' | 'material_purchase' | 'labor_payment' | 'overhead_fixed' | 'overhead_variable' | 'other';
   description: string;
   amount: number;
   paymentMethod: 'cash' | 'bank_transfer' | 'credit' | 'other';
   reference?: string;
+  owner?: Owner | number | null;
   supplier?: string;
-  customer?: string;
   invoiceNumber?: string;
   isPaid: boolean;
   dueDate?: string;
@@ -219,5 +229,43 @@ export interface DashboardStats {
   profitMargin: number;
   recentBatches: Batch[];
   recentSales: Sale[];
-  lowStockItems: Inventory[];
+  // New Metrics
+  totalCapital: number;
+  totalProductionCosts: number;
+  totalCashflowDirectCosts: number;
+  capitalUtilization: number;
+  productionCostBreakdown: {
+    material: number;
+    labor: number;
+    overhead: number;
+  };
+  cashflowDirectCostSplit: {
+    material: number;
+    labor: number;
+  };
+}
+
+// Owner Investment Summary
+export interface OwnerInvestmentSummary {
+  owner: Owner;
+  totalInvested: number;
+  allocatedCosts: number;
+  remainingBudget: number;
+  utilizationPercentage: number;
+}
+
+// Investment Dashboard Stats
+export interface InvestmentDashboardStats {
+  totalCapital: number;
+  totalCostsIncurred: number;
+  remainingCapital: number;
+  utilizationRate: number;
+  ownerSummaries: OwnerInvestmentSummary[];
+  costBreakdown: {
+    materials: number;
+    labor: number;
+    overheadFixed: number;
+    overheadVariable: number;
+    other: number;
+  };
 }
