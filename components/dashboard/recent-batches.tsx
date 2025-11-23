@@ -42,7 +42,7 @@ export function RecentBatches() {
                 <div>
                   <p className="font-medium text-gray-900">{batch.batchNumber}</p>
                   <p className="text-sm text-gray-600">
-                    {batch.product?.name || 'N/A'}
+                    {typeof batch.product === 'object' && batch.product !== null ? batch.product.name : 'N/A'}
                   </p>
                 </div>
                 <div className="text-end">

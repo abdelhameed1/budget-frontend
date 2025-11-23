@@ -48,9 +48,14 @@ export default function NewSalePage() {
   useEffect(() => {
     if (formData.product && batches) {
       const filtered = batches.filter(
-        batch => batch.product?.id === parseInt(formData.product) && 
+        batch => {
+          const productId = typeof batch.product === 'object' && batch.product !== null 
+            ? batch.product.id 
+            : batch.product;
+          return productId === parseInt(formData.product) && 
                  batch.status === 'completed' &&
-                 batch.costPerUnit > 0
+                 batch.costPerUnit > 0;
+        }
       );
       setAvailableBatches(filtered);
       

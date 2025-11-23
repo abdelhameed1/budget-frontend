@@ -23,11 +23,16 @@ export function useSale(id: number) {
   });
 }
 
+export type CreateSaleInput = Omit<Partial<Sale>, 'product' | 'batch'> & {
+  product: number;
+  batch: number;
+};
+
 export function useCreateSale() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (saleData: Partial<Sale>) => {
+    mutationFn: async (saleData: CreateSaleInput) => {
       const { data } = await apiClient.post<StrapiResponse<Sale>>('/sales', { data: saleData });
       return data.data;
     },
